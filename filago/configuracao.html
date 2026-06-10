@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Configuração - Filago</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-logo">Filago</div>
+    <div class="nav-buttons">
+      <button onclick="goto('index.html')">Início</button>
+      <button onclick="goto('configuracao.html')">Configuração</button>
+      <button onclick="goto('cliente.html')">Cliente</button>
+      <button onclick="goto('admin.html')">Admin</button>
+      <button onclick="goto('qrcode.html')">QR Code</button>
+    </div>
+  </nav>
+
+  <main>
+    <h2>Cadastro de Empresas</h2>
+
+    <form id="formEmpresa">
+      <label>Nome da Empresa</label>
+      <input type="text" name="nome" id="nome" required>
+
+      <div class="row">
+        <label><input type="checkbox" id="useLocation"> Capturar localização (lat/lng)</label>
+      </div>
+
+      <input type="hidden" name="latitude" id="latitude">
+      <input type="hidden" name="longitude" id="longitude">
+
+      <button type="submit">Cadastrar Empresa</button>
+    </form>
+
+    <div id="msg" class="msg"></div>
+
+    <hr>
+
+    <h3>Empresas cadastradas</h3>
+    <div id="empresasList"></div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        carregarEmpresasList();
+
+        document.getElementById('formEmpresa').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const nome = document.getElementById('nome').value.trim();
+          if (!nome) { showMessage('Nome é obrigatório','erro'); return; }
+
+          const useLocation = document.getElementById('useLocation').checked;
+          if (useLocation && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+              document.getElementById('latitude').value = pos.coords.latitude;
+              document.getElementById('longitude').value = pos.coords.longitude;
+              await criarEmpresa();
+            }, (err) => {
+              console.warn('Erro geoloc', err);
+              showMessage('Não foi possível obter localização. Cadastrando sem localização.','erro');
+              criarEmpresa();
+            }, { timeout: 8000 });
+          } else {
+            criarEmpresa();
+          }
+        });
+      });
+
+      async function criarEmpresa() {
+        const form = document.getElementById('formEmpresa');
+        const data = new FormData(form);
+        const res = await fetch('api/criar_empresa.php', { method: 'POST', body: data });
+        const text = await res.text();
+        showMessage(text, 'ok');
+        form.reset();
+        carregarEmpresasList();
+      }
+
+      async function carregarEmpresasList() {
+        const res = await fetch('api/listar_empresas.php');
+        const empresas = await res.json();
+        const div = document.getElementById('empresasList');
+        div.innerHTML = '';
+        empresas.forEach(e => {
+          const card = document.createElement('div');
+          card.className = 'company-card';
+          const clienteUrl = window.location.origin + window.location.pathname.replace(/index\.html|configuracao\.html|cliente\.html|admin\.html$/, 'cliente.html') + '?empresa=' + e.id;
+          const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(clienteUrl)}&format=png&margin=6`;
+          const qrImg = `<img src="${qrSrc}" alt="QR Code">`;
+          const mapsLink = e.latitude && e.longitude ? `<a href="https://www.google.com/maps/search/?api=1&query=${e.latitude},${e.longitude}" target="_blank">Abrir no Maps</a>` : '';
+          card.innerHTML = `
+            <div class="company-info">
+              <h4>${e.nome}</h4>
+              ${mapsLink}
+              <div class="company-actions">
+                <button onclick="goto('cliente.html?empresa=${e.id}')">Abrir fila</button>
+                <button onclick="showQRCode('${e.id}')">QR Code</button>
+                <button class="danger" onclick="removerEmpresa(${e.id})">Remover</button>
+              </div>
+            </div>
+
+          `;
+          div.appendChild(card);
+        });
+      }
+
+      function showQRCode(empresaId) {
+        goto('qrcode.html?empresa=' + empresaId);
+      }
+
+      async function removerEmpresa(id) {
+        if (!confirm('Remover empresa e todos os tickets dela?')) return;
+        const res = await fetch('api/remover_empresa.php?id=' + id);
+        const txt = await res.text();
+        showMessage(txt, 'ok');
+        carregarEmpresasList();
+      }
+    </script>
+  </main>
+</body>
+</html>

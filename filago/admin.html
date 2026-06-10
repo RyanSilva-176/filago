@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin - Filago</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-logo">Filago</div>
+    <div class="nav-buttons">
+      <button onclick="goto('index.html')">Início</button>
+      <button onclick="goto('configuracao.html')">Configuração</button>
+      <button onclick="goto('cliente.html')">Cliente</button>
+      <button onclick="goto('admin.html')">Admin</button>
+      <button onclick="goto('qrcode.html')">QR Code</button>
+    </div>
+  </nav>
+
+  <main>
+    <h2>Painel Admin</h2>
+    <div class="controls">
+      <label>Empresa</label>
+      <select id="empresa_id"></select>
+      <div class="admin-actions">
+        <button onclick="carregarFila()">Ver Fila</button>
+        <button onclick="chamarProximo()">Chamar Próximo</button>
+        <button onclick="goto('index.html')">Voltar ao Início</button>
+      </div>
+    </div>
+
+    <ul id="filaLista"></ul>
+    <div id="msg" class="msg"></div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+        await carregarEmpresas('empresa_id');
+      });
+
+      async function carregarFila() {
+        const empresa_id = document.getElementById('empresa_id').value;
+        if (!empresa_id) { showMessage('Escolha uma empresa','erro'); return; }
+        const res = await fetch('api/listar_fila.php?empresa_id=' + empresa_id);
+        const fila = await res.json();
+        const ul = document.getElementById('filaLista');
+        ul.innerHTML = '';
+        fila.forEach(ticket => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span>${ticket.id} - ${ticket.nome} <small>(${ticket.status})</small></span>`;
+          const actions = document.createElement('div');
+          actions.className = 'ticket-actions';
+          const btnAt = document.createElement('button');
+          btnAt.textContent = 'Atendido'; btnAt.onclick = () => marcarAtendido(ticket.id);
+          const btnRem = document.createElement('button');
+          btnRem.textContent = 'Remover'; btnRem.className = 'danger'; btnRem.onclick = () => removerTicket(ticket.id);
+          actions.appendChild(btnAt); actions.appendChild(btnRem);
+          li.appendChild(actions);
+          ul.appendChild(li);
+        });
+      }
+    </script>
+  </main>
+</body>
+</html>

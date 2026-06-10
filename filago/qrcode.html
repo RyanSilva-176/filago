@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QR Code - Filago</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+  <style>
+    .qr-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .qr-selector {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      padding: 28px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .qr-selector label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .qr-selector select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      font-size: 1rem;
+      background: var(--bg);
+      color: var(--text);
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+
+    .qr-selector select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .qr-selector button {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .qr-selector button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .qr-display {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background: var(--card);
+      padding: 36px 40px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .qr-display.visible {
+      display: flex;
+    }
+
+    .qr-display .empresa-nome {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .qr-display .qr-descricao {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .qr-display img {
+      width: 220px;
+      height: 220px;
+      border-radius: 12px;
+      border: 4px solid var(--primary);
+      box-shadow: 0 4px 20px rgba(43,123,255,0.15);
+      padding: 6px;
+      background: #fff;
+    }
+
+    .qr-link-box {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      word-break: break-all;
+      text-align: left;
+    }
+
+    .qr-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .qr-actions button {
+      flex: 1;
+      min-width: 130px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-download {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-download:hover {
+      opacity: 0.88;
+      transform: translateY(-2px);
+    }
+
+    .btn-print {
+      background: #fff;
+      color: var(--primary);
+      border: 1.5px solid var(--border) !important;
+    }
+
+    .btn-print:hover {
+      background: var(--bg);
+      transform: translateY(-2px);
+    }
+
+    .btn-nova-janela {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-nova-janela:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .qr-todas {
+      width: 100%;
+    }
+
+    .qr-todas h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+    }
+
+    .qr-card-mini {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .qr-card-mini:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .qr-card-mini img {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      border: 2px solid var(--primary);
+      padding: 4px;
+      background: #fff;
+    }
+
+    .qr-card-mini .nome {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .qr-card-mini .ver-btn {
+      font-size: 0.82rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    @media print {
+      nav, .qr-selector, .qr-actions, .qr-todas, #msg { display: none !important; }
+      .qr-display { box-shadow: none; border: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-logo">Filago</div>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <div class="nav-links" id="navLinks">
+      <button onclick="goto('index.html')">Início</button>
+      <button onclick="goto('configuracao.html')">Configuração</button>
+      <button onclick="goto('cliente.html')">Cliente</button>
+      <button onclick="goto('admin.html')">Admin</button>
+      <button onclick="goto('qrcode.html')" style="background:rgba(255,255,255,0.2);color:#fff;">QR Code</button>
+    </div>
+  </nav>
+
+  <main>
+    <h2>📱 Gerador de QR Code</h2>
+    <p style="color:var(--muted);margin-bottom:28px;">Gere e compartilhe o QR Code da sua empresa para que clientes entrem na fila automaticamente.</p>
+
+    <div class="qr-page">
+
+      <!-- Seletor de empresa -->
+      <div class="qr-selector">
+        <label for="empresa_sel">Selecione a empresa</label>
+        <select id="empresa_sel">
+          <option value="">Carregando...</option>
+        </select>
+        <button onclick="gerarQRCode()">🔳 Gerar QR Code</button>
+      </div>
+
+      <!-- Exibição do QR Code -->
+      <div class="qr-display" id="qrDisplay">
+        <div class="empresa-nome" id="qrEmpresaNome">—</div>
+        <p class="qr-descricao">Escaneie o QR Code abaixo para entrar na fila desta empresa automaticamente.</p>
+        <img id="qrImg" src="" alt="QR Code da empresa">
+        <div class="qr-link-box" id="qrLink">—</div>
+        <div class="qr-actions">
+          <button class="btn-download" onclick="baixarQR()">⬇ Baixar imagem</button>
+          <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+          <button class="btn-nova-janela" onclick="abrirNovaJanela()">↗ Abrir em nova aba</button>
+        </div>
+      </div>
+
+      <!-- Grid de todos os QR Codes -->
+      <div class="qr-todas" id="qrTodas">
+        <h3>Todos os QR Codes cadastrados</h3>
+        <div class="qr-grid" id="qrGrid"></div>
+      </div>
+
+    </div>
+
+    <div id="msg" class="msg"></div>
+  </main>
+
+  <script>
+    let empresasCache = [];
+    let qrUrlAtual = '';
+    let empresaNomeAtual = '';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await carregarTudo();
+
+      // Se vier ?empresa=ID na URL, gera automaticamente
+      const params = new URLSearchParams(location.search);
+      const id = params.get('empresa');
+      if (id) {
+        document.getElementById('empresa_sel').value = id;
+        gerarQRCode();
+      }
+    });
+
+    async function carregarTudo() {
+      try {
+        const res = await fetch('api/listar_empresas.php');
+        empresasCache = await res.json();
+
+        const sel = document.getElementById('empresa_sel');
+        sel.innerHTML = '<option value="">Selecione uma empresa...</option>';
+        empresasCache.forEach(e => {
+          const opt = document.createElement('option');
+          opt.value = e.id;
+          opt.textContent = e.nome;
+          sel.appendChild(opt);
+        });
+
+        renderizarGrid();
+      } catch (err) {
+        showMessage('Erro ao carregar empresas. Verifique a conexão.', 'erro');
+      }
+    }
+
+    function buildClienteUrl(empresaId) {
+      const base = window.location.origin + window.location.pathname.replace('qrcode.html', 'cliente.html');
+      return base + '?empresa=' + empresaId;
+    }
+
+    function buildQRSrc(url, size) {
+      // Usa QRServer (API da documentação: https://goqr.me/api/)
+      return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&format=png&color=2b7bff&bgcolor=ffffff&margin=10`;
+    }
+
+    function gerarQRCode() {
+      const sel = document.getElementById('empresa_sel');
+      const id = sel.value;
+      if (!id) { showMessage('Selecione uma empresa primeiro.', 'erro'); return; }
+
+      const empresa = empresasCache.find(e => String(e.id) === String(id));
+      if (!empresa) { showMessage('Empresa não encontrada.', 'erro'); return; }
+
+      const clienteUrl = buildClienteUrl(id);
+      qrUrlAtual = clienteUrl;
+      empresaNomeAtual = empresa.nome;
+
+      document.getElementById('qrEmpresaNome').textContent = empresa.nome;
+      document.getElementById('qrLink').textContent = clienteUrl;
+      document.getElementById('qrImg').src = buildQRSrc(clienteUrl, 300);
+      document.getElementById('qrDisplay').classList.add('visible');
+      document.getElementById('qrDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function renderizarGrid() {
+      const grid = document.getElementById('qrGrid');
+      grid.innerHTML = '';
+
+      if (empresasCache.length === 0) {
+        grid.innerHTML = '<p style="color:var(--muted);grid-column:1/-1;">Nenhuma empresa cadastrada ainda. <a href="configuracao.html">Cadastre uma aqui</a>.</p>';
+        return;
+      }
+
+      empresasCache.forEach(e => {
+        const url = buildClienteUrl(e.id);
+        const card = document.createElement('div');
+        card.className = 'qr-card-mini';
+        card.onclick = () => {
+          document.getElementById('empresa_sel').value = e.id;
+          gerarQRCode();
+        };
+        card.innerHTML = `
+          <img src="${buildQRSrc(url, 200)}" alt="QR Code ${e.nome}" loading="lazy">
+          <div class="nome">${e.nome}</div>
+          <div class="ver-btn">Clique para ampliar →</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function baixarQR() {
+      if (!qrUrlAtual) return;
+      const link = document.createElement('a');
+      // Usa PNG maior para download
+      link.href = buildQRSrc(qrUrlAtual, 500);
+      link.download = `qrcode-${empresaNomeAtual.replace(/\s+/g, '-').toLowerCase()}.png`;
+      link.target = '_blank';
+      link.click();
+    }
+
+    function abrirNovaJanela() {
+      if (!qrUrlAtual) return;
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>QR Code – ${empresaNomeAtual}</title>
+          <style>
+            body { font-family: sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#f4f7fb; gap:18px; }
+            h2 { color:#2b7bff; margin:0; }
+            img { border: 4px solid #2b7bff; border-radius:12px; padding:8px; background:#fff; }
+            p { color:#6b7280; font-size:0.9rem; }
+          </style>
+        </head>
+        <body>
+          <h2>📱 ${empresaNomeAtual}</h2>
+          <img src="${buildQRSrc(qrUrlAtual, 400)}" width="400" height="400" alt="QR Code">
+          <p>Escaneie para entrar na fila</p>
+          <small style="color:#bbb;">${qrUrlAtual}</small>
+        </body>
+        </html>
+      `);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Filago - Início</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="background-slider">
+    <div class="slide active"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+  </div>
+  <nav class="navbar">
+    <div class="nav-logo">Filago</div>
+  
+    <div class="hamburger" onclick="toggleMenu()">
+      ☰
+    </div>
+  
+    <div class="nav-links" id="navLinks">
+      <button onclick="goto('index.html')">Início</button>
+      <button onclick="goto('configuracao.html')">Configuração</button>
+      <button onclick="goto('cliente.html')">Cliente</button>
+      <button onclick="goto('admin.html')">Admin</button>
+      <button onclick="goto('qrcode.html')">QR Code</button>
+    </div>
+  </nav>
+
+  <main>
+    <section data-aba="home" id="home">
+      <h1>Bem-vindo ao Filago</h1>
+      <p>Gerencie filas de atendimento com QR Code e geolocalização.</p>
+      <div class="cards">
+        <div class="card">
+          <h3>Configurar Empresas</h3>
+          <p>Cadastre empresas, defina localização e gere QR Code.</p>
+          <button onclick="goto('configuracao.html')">Abrir Configuração</button>
+        </div>
+        <div class="card">
+          <h3>Entrar na Fila</h3>
+          <p>Clientes podem escolher a empresa e entrar na fila.</p>
+          <button onclick="goto('cliente.html')">Abrir Cliente</button>
+        </div>
+        <div class="card">
+          <h3>Painel Admin</h3>
+          <p>Gerencie tickets, chame próximo e remova tickets.</p>
+          <button onclick="goto('admin.html')">Abrir Admin</button>
+        </div>
+        <div class="card">
+          <h3>📱 QR Code</h3>
+          <p>Gere e baixe o QR Code da empresa para os clientes escanearem e entrarem na fila.</p>
+          <button onclick="goto('qrcode.html')">Gerar QR Code</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
